@@ -2,12 +2,9 @@
 
 ## Introduction
 
-This code provides the implementation of the paper "A Graph Signal Processing Perspective of Network Multiple Hypothesis Testing with False Discovery Rate Control" by 
-xxx. The paper is available at [arXiv](https://arxiv.org/abs/xxxx.10107).
+This code provides the implementation of the paper "A Graph Signal Processing Perspective of Network Multiple Hypothesis Testing with False Discovery Rate Control". The paper is available [online](https://arxiv.org/abs/2408.03142).
 
 ## Implementation
-
-### Setup virtual environment
 
 1. Create a virtual environment and install the requirements:
 ```
@@ -17,19 +14,19 @@ cd path/to/this/repo
 pip install -r requirements.txt
 ```
 
-3. set the working directory to `/scripts`:
+2. Set the working directory to `/scripts`:
 ```
 cd scripts
 ```
 
-To generate the example figures:
+3. To generate the example figures:
 ```
 python comm_data_illus_generate.py # generate the data
 python comm_data_illus_performance.py # generate the performance
 python example_illus.py # generate the figures after example.
 ```
 
-To produce the results in the paper:
+4. To produce the results in the paper:
 ```
 python comm_data_fast_fade_generate.py # generate the data
 python main.py # generate the performance
@@ -47,3 +44,14 @@ If you use git commit and allow it to replace LF by CRLF, then you may get error
 git config --global core.autocrlf false
 ```
 More details about this issue can be found [here](https://gist.github.com/NateWeiler/df202280ce8cc38e9f00dbc17708fab2).
+
+## Citation
+If you use this code in your research, please cite the following papers:
+
+X. Jian, M. Gölz, F. Ji, W. P. Tay, and A. M. Zoubir, “A graph signal
+processing perspective of network multiple hypothesis testing with false
+discovery rate control,” arXiv preprint arXiv:2408.03142, 2024.
+
+M. Gölz, A. M. Zoubir, and V. Koivunen, “Multiple hypothesis testing
+framework for spatial signals,” IEEE Trans. Signal Inf. Process. Netw.,
+vol. 8, pp. 771–787, 2022.

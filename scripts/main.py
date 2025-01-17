@@ -1,6 +1,11 @@
+# Copyright (c) 2025, Xingchao Jian (Nanyang Technological University), Martin Goelz (TU Darmstadt)
+# All rights reserved.
+
+# This code is licensed under the MIT License.
+# You may obtain a copy of the License at https://opensource.org/licenses/MIT
+
 import argparse
 import numpy as np
-import pickletools
 
 from utils import *
 from detection import *

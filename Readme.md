@@ -29,7 +29,7 @@ python example_illus.py # generate the figures after example.
 4. To produce the results in the paper:
 ```
 python comm_data_fast_fade_generate.py # generate the data
-python main.py # generate the performance
+python main.py --method_names MHT-GGSP MHT-GGSP_cens MHT-GGSP_reg lfdr-sMoM BH FDR-smoothing SABHA AdaPT# generate the performance
 ```
 
 ## Remark

@@ -1,3 +1,13 @@
+"""
+Copyright (c) 2025, Xingchao Jian (Nanyang Technological University), Martin Goelz (TU Darmstadt)
+All rights reserved.
+
+This code is licensed under the MIT License.
+You may obtain a copy of the License at https://opensource.org/licenses/MIT
+
+Run this file to view the detection results on the illustration data.
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 

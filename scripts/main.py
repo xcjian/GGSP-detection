@@ -1,8 +1,12 @@
-# Copyright (c) 2025, Xingchao Jian (Nanyang Technological University), Martin Goelz (TU Darmstadt)
-# All rights reserved.
+"""
+Copyright (c) 2025, Xingchao Jian (Nanyang Technological University), Martin Goelz (TU Darmstadt)
+All rights reserved.
 
-# This code is licensed under the MIT License.
-# You may obtain a copy of the License at https://opensource.org/licenses/MIT
+This code is licensed under the MIT License.
+You may obtain a copy of the License at https://opensource.org/licenses/MIT
+
+Run this code to reproduce the main experimental results of the paper.
+"""
 
 import argparse
 import numpy as np

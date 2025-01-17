@@ -1,4 +1,10 @@
 """
+Copyright (c) 2025, Xingchao Jian (Nanyang Technological University), Martin Goelz (TU Darmstadt)
+All rights reserved.
+
+This code is licensed under the MIT License.
+You may obtain a copy of the License at https://opensource.org/licenses/MIT
+
 Run this file to generate the data for the communication scenario with fast fading.
 """
 # %% setup: import packages

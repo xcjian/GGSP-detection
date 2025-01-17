@@ -33,10 +33,10 @@ python main.py # generate the performance
 ```
 
 ## Remark
-the folder 'data_for_R' provides the data can be used by R.
+the folder `/data_for_R` provides the data can be used by R.
 You can change the fast fading channel model and parameters in the file 
-'scripts/parameters.py' and run the file to simulate the field under different scenarios. After that,
-specify the data and results path in scripts/utils.get_config.
+`scripts/parameters.py` and run the file to simulate the field under different scenarios. After that,
+specify the data and results path in `scripts/utils.get_config`.
 
 If you use git commit and allow it to replace LF by CRLF, then you may get errors when trying to load 
 .pkl files. You can use the following command to avoid this issue:

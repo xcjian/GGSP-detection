@@ -35,9 +35,6 @@ combinatorial = config['combinatorial']
 # Set the parameters for the proportion-matching method
 tau_pmatch = config['tau_pmatch']
 
-# Set the parameters for the SABHA method
-tau_sabha = config['tau_sabha']
-
 #Set plotting parameters
 method_names = config['method_names']
 line_styles = config['line_styles']
@@ -102,10 +99,10 @@ for noise_idx in range(n_noise_levels):
         dat_ggsp = {'p_val': p_values_obs, 'sample_points': sample_points}
         dat_info_ggsp = {'graph_basis': g_fb, 'time_max_idx': p_values.shape[0]}
         para_config_ggsp = {'bandwidths': {'graph_bw_ran': graph_bw_ran, 'time_bw_ran': time_bw_ran},
-                             'nonlinear_type': 'softplus_dash', 'null_pdf': null_pdf}
+                             'nonlinear_type': 'sigmoid', 'null_pdf': null_pdf}
 
             # estimate the lfdrs
-        filename_ggsp = 'beta-ggsp-' + para_config_ggsp['nonlinear_type'] + f'_repeat_{repeat_idx}.pkl'
+        filename_ggsp = 'MHT-GGSP' + f'_repeat_{repeat_idx}.pkl'
         sav_path = os.path.join(curr_res_path, filename_ggsp)
         lfdr_ggsp, _, _, _, est_time_direct= est_lfdr_beta_ggsp(dat_ggsp, dat_info_ggsp, para_config_ggsp, sav_path, sav_res)
         # detect the hypotheses
@@ -150,7 +147,7 @@ for noise_idx in range(n_noise_levels):
                 ground_truth_grid[x, y] = [0.529, 0.808, 1]  # Deeper blue for alternative
 
         # Create a graph
-        G = nx.from_numpy_matrix(graph_adj)
+        G = nx.from_numpy_array(graph_adj)
 
         # Assign colors based on detection results
         colors_illus = []

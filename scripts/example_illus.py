@@ -61,7 +61,7 @@ gamma_norm_graph = np.linalg.norm(gamma_graph, axis=2)
 # ------------------------------------------------------------
 
 # Create the graph from the adjacency matrix
-G = nx.from_numpy_matrix(graph_adj)
+G = nx.from_numpy_array(graph_adj)
 pos = {i: (node_coords[i, 0], node_coords[i, 1]) for i in range(node_coords.shape[0])}
 
 def plot_gam(gam_single_grid, gam_single_graph, transmitter_coord, range, power):

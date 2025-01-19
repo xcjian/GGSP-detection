@@ -31,6 +31,7 @@ python example_illus.py # generate the figures after example.
 python comm_data_fast_fade_generate.py # generate the data
 python main.py --method_names MHT-GGSP MHT-GGSP_cens MHT-GGSP_reg lfdr-sMoM BH FDR-smoothing SABHA AdaPT# generate the performance
 ```
+The result figures can be found in the subfolders of the folder `/results`.
 
 ## Remark
 the folder `/data_for_R` provides the data can be used by R.

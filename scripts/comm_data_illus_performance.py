@@ -170,9 +170,9 @@ for noise_idx in range(n_noise_levels):
                     colors_illus.append('red')  # null but detected
             elif node in alt_vertices_graph:
                 if node in alt_vertices_ggsp:
-                    colors_illus.append('purple')  # alternative and detected
+                    colors_illus.append('green')  # alternative and detected
                 else:
-                    colors_illus.append('blue')  # alternative but not detected
+                    colors_illus.append('cyan')  # alternative but not detected
             edgecolors.append('black')  # Add black boundaries to all nodes
 
         # Plot the background grid
@@ -186,7 +186,7 @@ for noise_idx in range(n_noise_levels):
         # Plot the transmitter coordinates
         for t in range(center_coords.shape[1]):
             transmitter_coords = center_coords[inspect_instance, t, :]  # Coordinates of the t-th transmitter
-            ax.scatter(transmitter_coords[0], transmitter_coords[1], s=300, marker='*', color = 'orange', zorder=5,
+            ax.scatter(transmitter_coords[0], transmitter_coords[1], s=600, marker='*', color = 'orange', zorder=5,
                        label=f'Transmitter {t + 1}')
 
         # Set the title and show the plot

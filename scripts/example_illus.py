@@ -111,7 +111,7 @@ def plot_gam(gam_single_grid, gam_single_graph, transmitter_coord, range, power)
     cbar.ax.tick_params(labelsize=20)
 
     # Plot the transmitter coordinates
-    ax.scatter(transmitter_coord[0], transmitter_coord[1], s=300, marker='*', color = 'orange', zorder=5,
+    ax.scatter(transmitter_coord[0], transmitter_coord[1], s=600, marker='*', color = 'orange', zorder=5,
                    label=f'Transmitter {t + 1}')
 
 plot_pow = 1/2

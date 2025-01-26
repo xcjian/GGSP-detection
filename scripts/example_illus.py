@@ -74,57 +74,50 @@ gamma_norm_graph = np.linalg.norm(gamma_graph, axis=2)
 G = nx.from_numpy_array(graph_adj)
 pos = {i: (node_coords[i, 0], node_coords[i, 1]) for i in range(node_coords.shape[0])}
 
-def plot_gam(gam_single_grid, gam_single_graph, transmitter_coord, range, power):
+def plot_gam_combined(gamma_grid, gamma_graph, transmitter_coords, plot_val_range, plot_pow, gamma_dim, save_fig=False, res_path="."):
     """
-    Plot the field and graph with gamma values on it.
-    This function is used to plot one dimension of gamma.
-    :param gam_single_grid: 2D array of gamma values on the grid
-    :param gam_single_graph: 1D array of gamma values on the graph
-    :param transmitter_coord: Coordinates of the transmitter
-    :param range: Range of gamma values on the plot bar
-    :param power: Power to raise gamma values to for better visualization
+    Plot gamma(v,t) as 2 subfigures in a single horizontal figure with a shared color bar on the left.
     """
-
-    gam_single_grid = gam_single_grid ** power
-    gam_single_graph = gam_single_graph ** power
-
     # Normalize gamma for color mapping
-    norm = plt.Normalize(vmin=range[0], vmax=range[1])
+    norm = plt.Normalize(vmin=plot_val_range[0], vmax=plot_val_range[1])
     cmap = plt.cm.Blues
 
-    # Plot the graph with distances represented as colors
-    fig, ax = plt.subplots(figsize=(12, 12))
+    # Create a figure with horizontal subplots
+    fig, axs = plt.subplots(1, gamma_dim, figsize=(16, 8), gridspec_kw={'width_ratios': [1, 1], 'wspace': -0.2})
 
-    # Normalize distances for color mapping
-    im = ax.imshow(gam_single_grid, origin='lower', extent=(0, grid_wid, 0, grid_wid), cmap=cmap, norm=norm)
+    for k in range(gamma_dim):
+        gam_single_grid = gamma_grid[inspect_instance, :, :, k] ** plot_pow
+        gam_single_graph = gamma_graph[inspect_instance, :, k] ** plot_pow
+        transmitter_coord = transmitter_coords[inspect_instance, k, :]
 
-    # Draw the graph with nodes colored by gamma
-    nx.draw(G, pos, with_labels=False, node_color=gam_single_graph, cmap=cmap, node_size=70, ax=ax, vmin=range[0], vmax=range[1],
-            edgecolors='k')
+        # Plot the graph with distances represented as colors
+        ax = axs[k]
+        im = ax.imshow(gam_single_grid, origin='lower', extent=(0, grid_wid, 0, grid_wid), cmap=cmap, norm=norm)
 
-    # Add color bar
-    # Create a divider for the color bar
-    divider = make_axes_locatable(ax)
-    cax = divider.append_axes("bottom", size="5%", pad=0.1)
+        # Draw the graph with nodes colored by gamma
+        nx.draw(G, pos, with_labels=False, node_color=gam_single_graph, cmap=cmap, node_size=70, ax=ax,
+                vmin=plot_val_range[0], vmax=plot_val_range[1], edgecolors='k')
 
-    cbar = plt.colorbar(im, cax=cax, orientation="horizontal")
-    cbar.ax.tick_params(labelsize=20)
+        # Plot the transmitter coordinates
+        ax.scatter(transmitter_coord[0], transmitter_coord[1], s=600, marker='*', color='orange', zorder=5, label=f'Transmitter {k + 1}')
 
-    # Plot the transmitter coordinates
-    ax.scatter(transmitter_coord[0], transmitter_coord[1], s=600, marker='*', color = 'orange', zorder=5,
-                   label=f'Transmitter {t + 1}')
+    # Add a shared color bar on the left
+    cax = fig.add_axes([0.11, 0.20, 0.02, 0.6])  # [left, bottom, width, height]
+    cbar = plt.colorbar(im, cax=cax, orientation="vertical")
+    cbar.ax.tick_params(labelsize=15)
 
-plot_pow = 1/2
-plot_val_range = np.array([gamma_grid[inspect_instance, :, :, :].min(), gamma_grid[inspect_instance, :, :, :].max()])
-plot_val_range = plot_val_range ** plot_pow
-for k in range(gamma_dim):
-    plot_gam(gamma_grid[inspect_instance, :, :, k], gamma_graph[inspect_instance, :, k], center_coords[inspect_instance, k, :], plot_val_range, plot_pow)
-    # Set the title and show the plot
-    # ax.set_title('Minimum Distance from Each Vertex to Either Transmitter')
+    # Save the combined figure if required
     if save_fig:
-        fig_path = os.path.join(res_path, f'gamma_dim{k}.pdf')
-        plt.savefig(fig_path)
+        fig_path = os.path.join(res_path, 'combined_gamma_plot.pdf')
+        plt.savefig(fig_path, bbox_inches='tight')
+
     plt.show()
+
+# Example usage
+plot_pow = 1 / 2
+plot_val_range = np.array([gamma_grid[inspect_instance, :, :, :].min(), gamma_grid[inspect_instance, :, :, :].max()]) ** plot_pow
+plot_gam_combined(gamma_grid, gamma_graph, center_coords, plot_val_range, plot_pow, gamma_dim, save_fig=True, res_path=res_path)
+
 
 # ------------------------------------------------------------
 # plot the empirical distribution of p-values under different ranges of gamma's norm
@@ -132,7 +125,9 @@ for k in range(gamma_dim):
 
 # Define the gamma value bins
 gamval_bins = [0.2, 0.35, 0.5]
-# bin_labels = ['0.1-0.3', '0.3-0.5']
+
+# Create a 1x2 figure
+fig, axs = plt.subplots(1, len(gamval_bins) - 1, figsize=(14, 6), gridspec_kw={'wspace': 0.14})
 
 # Plot histograms for p-values in different distance ranges
 
@@ -153,19 +148,24 @@ for i, (lower, upper) in enumerate(zip(gamval_bins[:-1], gamval_bins[1:])):
     alt_p_vals_in_range = p_vals_in_range_all[hypotheses_in_range_all == 1]
 
     # Plot histogram with frequencies
-    plt.hist(alt_p_vals_in_range, bins=20, color='blue', edgecolor='black', density=True, range=(0, 1))
-    plt.xlim((0, 1))
-    plt.xlabel('Alternative $p$-value')
-    plt.ylabel('Frequency')
+    axs[i].hist(alt_p_vals_in_range, bins=20, color='blue', edgecolor='black', density=True, range=(0, 1))
+    axs[i].set_xlim((0, 1))
+    axs[i].set_xlabel('Alternative $p$-value', fontsize=18)
+    axs[i].set_ylabel('Frequency', fontsize=18)
 
     # Compute the proportion of null hypotheses
     proportion_null = np.sum(hypotheses_in_range_all == 0) / len(hypotheses_in_range_all)
-    plt.title(r'empirical $\pi_0$: ' + f'{proportion_null:.2f}')
+    axs[i].set_title(r'empirical $\pi_0$: ' + f'{proportion_null:.2f}', fontsize=18)
 
-    if save_fig:
-        fig_path = os.path.join(res_path, f'p_dist_{i}.pdf')
-        plt.savefig(fig_path)
-    plt.show()
+    # Make x-axis tick labels larger
+    axs[i].tick_params(axis='x', labelsize=15)  # Adjust fontsize for x-axis ticks
+    # Make y-axis tick labels larger
+    axs[i].tick_params(axis='y', labelsize=15)  # Adjust fontsize for y-axis ticks
+
+if save_fig:
+    fig_path = os.path.join(res_path, 'p_value_distribution_combined.pdf')
+    plt.savefig(fig_path, bbox_inches='tight')
+plt.show()
 
 
 print('Done!')

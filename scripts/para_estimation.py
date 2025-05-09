@@ -112,7 +112,83 @@ def est_paras_beta_ggsp(p_val, sample_points, graph_basis, time_max_idx, bandwid
     # set the estimated alpha to be at least small_val.
     pi0_hat_all = alpha_hat_all
 
-    return f1_p, pi0_hat, pi0_hat_all
+    return f1_p, pi0_hat, pi0_hat_all, gft_bw_best, tft_bw_best
+
+def compute_pi0(gam_val, null_threshold, rice_ratio = 20, repetition = 5000):
+    """
+    This function computes pi0 given gamma at (v, t).
+    gam_val: the gamma vector at (v, t).
+    rice_ratio: rician distribution parameter.
+    null_threshold: threshold for the abs value of x(v, t).
+
+    Return: pi_0 at (v, t).
+    """
+
+    gamma_dim = len(gam_val)
+    x_ff = np.zeros((gamma_dim, repetition))
+    # generate x_ff realizations.
+    for k in range(gamma_dim):
+        sig = gam_val[k]
+
+        param_K = rice_ratio
+        param_Omega = sig ** 2
+        param_b = np.sqrt(2 * param_K)
+        param_scale = np.sqrt(param_Omega / (2 * (param_K + 1)))
+        
+        x_ff[k, :] = stats.rice.rvs(param_b, scale=param_scale, size = repetition)
+
+    x_ff_abs = np.abs(x_ff)
+
+    # compute |x|:
+    x_abs = np.max(x_ff_abs, axis = 0)
+
+    # count the number of times that x_abs exceeds the threshold
+    count = np.count_nonzero(x_abs <= null_threshold)
+
+    return count / repetition
+
+def compute_fp(p, gam_val, null_threshold, noise_level, rice_ratio = 20, repetition = 5000):
+    """
+    This function computes fp(p) given gamma at (v, t).
+    gam_val: the gamma vector at (v, t).
+    rice_ratio: rician distribution parameter.
+    null_threshold: threshold for the abs value of x(v, t).
+
+    Return: pi_0 at (v, t).
+    """
+
+    gamma_dim = len(gam_val)
+    x_ff = np.zeros((gamma_dim, repetition))
+    # generate x_ff realizations.
+    for k in range(gamma_dim):
+        sig = gam_val[k]
+
+        param_K = rice_ratio
+        param_Omega = sig ** 2
+        param_b = np.sqrt(2 * param_K)
+        param_scale = np.sqrt(param_Omega / (2 * (param_K + 1)))
+        
+        x_ff[k, :] = stats.rice.rvs(param_b, scale=param_scale, size = repetition)
+
+    x_ff_abs = np.abs(x_ff)
+
+    # compute |x|:
+    x_abs = np.max(x_ff_abs, axis = 0)
+
+    # generate p-value:
+    p_vals = np.zeros(repetition)
+    null_idx = np.where(x_abs <= null_threshold)[0]
+    alt_idx = np.where(x_abs > null_threshold)[0]
+    y_sig = x_abs[alt_idx] + np.random.normal(0, noise_level, len(alt_idx))
+
+    p_vals[null_idx] = np.random.uniform(0, 1, size = len(null_idx))
+    p_vals[alt_idx] = 1 - stats.chi2.cdf(y_sig ** 2, df=1)
+
+    # estimate the pdf of p-value:
+    kernel = stats.gaussian_kde(p_vals)
+    fp = kernel.pdf(p)
+
+    return fp
 
 
 def beta_ggsp_solver_scipy(p_val, basis_matrix, nonlinear_type):

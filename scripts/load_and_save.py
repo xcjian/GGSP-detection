@@ -9,6 +9,7 @@ import os
 
 import _pickle as pickle
 import numpy as np
+import pandas as pd
 
 
 def ld_pickle(fil_str):
@@ -97,6 +98,51 @@ def ld_noise_std(dat_path):
     """
     noise_std = np.load(dat_path + '/noise_std.npy')
     return noise_std
+
+def ld_control_paras(dat_path):
+    """
+    Load the control parameter of the noise.
+    Parameters
+    ----------
+    dat_path : str
+        The path to the data.
+
+    Returns
+    -------
+
+    """
+
+    with open(dat_path + '/control_paras.pkl', 'rb') as f:
+        data = pickle.load(f)
+
+    step_size = data['step_size']
+    move_type = data['move_type']
+    initial_pos = data['initial_pos']
+    move_direction = data['move_direction']
+
+    return move_type, step_size, initial_pos, move_direction
+
+def ld_alg_properties(dat_path):
+    """
+    Load the output properties of the algorithm.
+    Parameters
+    ----------
+    dat_path : str
+        The path to the data.
+
+    Returns
+    -------
+
+    """
+    
+    res = pd.read_pickle(dat_path)
+    gft_bw_best = res['gft_bw_best']
+    tft_bw_best = res['tft_bw_best']
+
+    gft_bw_best = np.array(gft_bw_best)[0]
+    tft_bw_best = np.array(tft_bw_best)[0]
+
+    return gft_bw_best, tft_bw_best
 
 def sv_fd(dat_path, fd):
     """Save the given RadioSpatialField in a pickle file under the given name.

@@ -62,7 +62,7 @@ def get_par_mbm_em(dat_path, par="stan"):
         return K_cnds, n_ran_init, cvg_thr
 
 
-def get_par_fd_scen(fd_scen, dat_path):
+def get_par_fd_scen(fd_scen, dat_path, T = -1):
     """
     Returns the parameters for the given field scenario.
 
@@ -72,6 +72,8 @@ def get_par_fd_scen(fd_scen, dat_path):
         The scenario name.
     dat_path : str
         The path to where the data is stored.
+    T: int
+        if you want to manually change the number of instances.
 
     Returns
     -------
@@ -246,6 +248,9 @@ def get_par_fd_scen(fd_scen, dat_path):
             n_MC = custom_vls['p'][0].shape[0]
             print(" complete!")
             return fd_dim, n_MC, np.nan, np.nan, np.nan, np.nan, np.nan
+    
+        if  T > 0:
+            n_MC = T
 
         with open(os.path.join(
                 dat_path, fd_scen) + '_par.pkl', 'wb') as output:

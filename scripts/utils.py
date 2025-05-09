@@ -506,7 +506,7 @@ def knn_graph(k, coords):
 
     return knn_graph
 
-def get_config(dataset, vary_snr):
+def get_config(dataset, vary_snr = True):
     """
     Load the configuration parameters.
 
@@ -591,6 +591,56 @@ def get_config(dataset, vary_snr):
             # Set the parameters for the proportion-matching method
             'tau_pmatch': 0.3,
         }
+    elif dataset == 'straight_move_illus':
+
+        data_path = [os.path.join(os.getcwd(), '../data/scC_TSPIN/straight_move_illus_data/T_0', 'data_for_py')]
+        res_path = [os.path.join(os.getcwd(), '../results/scC_TSPIN/straight_move_illus_res/T_0')]
+
+        config = {
+            'data_path': data_path,
+            'res_path': res_path,
+            'repeat_time': 1,
+            'alp_levels': np.concatenate((np.array([0.02, 0.05, 0.07]), np.linspace(0.10, 1, 19))),
+            'sav_res': True,
+            'sav_plots': True,  # Save the plots as pdf files
+            'instance_inspect': [0, 1, 2],  # The instances for illustration
+
+            # Set the parameters for the MHT-GGSP method
+            'graph_bw_ran': np.arange(10, 35, 2),
+            'time_bw_ran': np.arange(0, 6, 1),
+            'combinatorial': True,
+            'null_pdf': 'uniform',
+        }
+    elif dataset == 'straight_move':
+
+        data_path = []
+        res_path = []
+
+        T_idx_list = list(range(0, 15))
+
+        for T_idx in T_idx_list:
+            data_path_ = os.path.join(os.getcwd(), '../data/scC_TSPIN/straight_move_data/T_{}'.format(T_idx), 'data_for_py')
+            res_path_ = os.path.join(os.getcwd(), '../results/scC_TSPIN/straight_move_res/T_{}'.format(T_idx))
+
+            data_path.append(data_path_)
+            res_path.append(res_path_)
+        
+        config = {
+            'data_path': data_path,
+            'res_path': res_path,
+            'repeat_time': 1,
+            'alp_levels': np.concatenate((np.array([0.02, 0.05, 0.07]), np.linspace(0.10, 1, 19))),
+            'sav_res': True,
+            'sav_plots': True,  # Save the plots as pdf files
+            'instance_inspect': [0, 1, 2],  # The instances for illustration
+
+            # Set the parameters for the MHT-GGSP method
+            'graph_bw_ran': np.arange(8, 36, 2),
+            'time_bw_ran': np.arange(0, 5, 1),
+            'combinatorial': True,
+            'null_pdf': 'uniform',
+        }
+
     else:
         raise ValueError('Invalid dataset name.')
 
@@ -610,6 +660,8 @@ def get_config(dataset, vary_snr):
         omit_method = []
     elif dataset == 'communication_illus':
         omit_method = []
+    elif dataset == 'straight_move' or dataset == 'straight_move_illus':
+        omit_method = ['MHT-GGSP_cens', 'MHT-GGSP_reg', 'lfdr-sMoM', 'Prop-matching', 'BH', 'FDR-smoothing', 'SABHA', 'AdaPT']
 
     # omit methods that does not work.
     for method in omit_method:

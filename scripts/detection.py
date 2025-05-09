@@ -11,6 +11,8 @@ from utils import *
 from scipy import stats
 import pandas as pd
 import numpy as np
+import pickle
+import time
 
 
 def det_lfdr(alp_levels, lfdr, h_true):
@@ -280,6 +282,72 @@ def det_GGSP_adapt(data, alp_levels, config, sav_path, sav_res):
 
     return h_est, FDR, pow
 
+def lfdr_oracle(data, sav_path, sav_res):
+    """
+    This function computes oracle lfdr valeus at all (v, t) sample points.
+    Inputs:
+    data = {'p_val': p_values_obs, 
+                   'sample_points': sample_points,
+                   'gamma_graph': gamma_graph,
+                   'null_threshold': null_threshold,
+                   'noise_level': noise_level
+                   }
+    Return:
+    Oracle lfdr values.
+    """
+    try:
+        with open(sav_path, 'rb') as f:
+            res = pickle.load(f)
+        
+        lfdr = res['lfdr']
+        pi0 = res['pi0']
+        f_p = res['fp']
+        time_cost = res['time']
+
+        print("MHT-GGSP-oracle loaded!")
+    except FileNotFoundError:
+        print("No results found for MHT-GGSP-oracle, computing ...", end="")
+
+        p_val = data['p_val']
+        sample_points = data['sample_points']
+        gamma_graph = data['gamma_graph']
+        null_threshold = data['null_threshold']
+        noise_level = data['noise_level']
+
+        start_time = time.time()
+
+        # obtain pi0 and f1p
+        n_pval = len(p_val)
+        pi0 = np.zeros(n_pval)
+        f_p = np.zeros(n_pval)
+        for i in range(n_pval):
+            sample_pt_ = sample_points[i, :]
+            instance_ = sample_pt_[0]
+            vertex_ = sample_pt_[1]
+            gam_val_ = gamma_graph[instance_, vertex_, :]
+            p_ = p_val[i]
+            pi0[i] = compute_pi0(gam_val_, null_threshold)
+            f_p[i] = compute_fp(p_, gam_val_, null_threshold, noise_level)
+        lfdr = pi0 / f_p
+
+        end_time = time.time()
+        time_cost = end_time - start_time
+
+        res = {
+            'lfdr': lfdr,
+            'pi0': pi0,
+            'f_p': f_p,
+            'time': time_cost
+        }
+
+        if sav_res:
+            with open(sav_path, 'wb') as f:
+                pickle.dump(res, f)
+    
+    return lfdr, pi0, f_p, time_cost
+
+
+
 def est_lfdr_beta_ggsp(data, data_info, para_config, sav_path, sav_res):
     """Estimate the lfdrs using the MHT-GGSP model.
 
@@ -328,7 +396,7 @@ def est_lfdr_beta_ggsp(data, data_info, para_config, sav_path, sav_res):
         nonlinear_type = para_config['nonlinear_type']
 
         start_time = time.time()
-        f1_p, pi0, _ = est_paras_beta_ggsp(p_val, sample_points, graph_basis, time_max_idx, bandwidths, nonlinear_type)
+        f1_p, pi0, _ , gft_bw_best, tft_bw_best = est_paras_beta_ggsp(p_val, sample_points, graph_basis, time_max_idx, bandwidths, nonlinear_type)
         end_time = time.time()
         est_time = end_time - start_time
 
@@ -341,6 +409,8 @@ def est_lfdr_beta_ggsp(data, data_info, para_config, sav_path, sav_res):
                  "f1_p_hat": f1_p,
                  "lfdr_hat": lfdr,
                  "pi0_hat": pi0,
+                 "gft_bw_best": gft_bw_best,
+                 "tft_bw_best": tft_bw_best,
                     "est_time": est_time
                  })
             res.to_pickle(sav_path)

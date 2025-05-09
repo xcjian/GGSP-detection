@@ -573,7 +573,7 @@ class RadioSpatialField(SpatialField):
 
     @author: Martin Goelz
     """
-    def __init__(self, scen, dim, n_MC, n_tr_sam, n_obs_sam, noise_std):
+    def __init__(self, scen, dim, n_MC, n_tr_sam, n_obs_sam, noise_std, control_paras = {}):
         if len(dim) != 2:
             print("A radio field has to be 2D!")
         else:
@@ -612,7 +612,27 @@ class RadioSpatialField(SpatialField):
         self.X = np.zeros((self.n_MC, self.n))
         self.X_sf = np.zeros((self.n_MC, self.n, self.n_src))
 
-        # record the centers of transmitters.
+        # set the property of transmitters.
+        try:
+            self.move_type = control_paras['move_type']
+        except:
+            self.move_type = 'random_walk'
+
+        try:
+            self.step_size = control_paras['step_size']
+        except:
+            self.step_size = 3
+        
+        try:
+            self.initial_pos = control_paras['initial_pos']
+        except:
+            self.initial_pos = None
+
+        try:
+            self.move_direction = control_paras['move_direction']
+        except:
+            self.move_direction = None
+
         self.cen = np.zeros((self.n_MC, self.n_src, 2))
 
     def com_gp_lng(self, D, s_t_dB, s_r_min_dB, K_dB, sig_s):
@@ -719,7 +739,7 @@ class RadioSpatialField(SpatialField):
             The scenario name.
         dat_path : str
             The path to where the data is stored.
-        @author Martin Goelz
+        @author Xingchao Jian, Martin Goelz
         """
         [fd_dim, n_MC, n_sam, n_src, ran_cen, ran_rad, ran_pre, add_tra,
             pi0_des, sha_fa, fast_fa, prop_env] = ls.ld_sc(dat_path, fd_scen)
@@ -815,13 +835,16 @@ class RadioSpatialField(SpatialField):
                 0, self.n, size=(self.n_MC, self.n_src))).astype(int)
 
         # set dynamic centers
-        grid_speed = 3
+        grid_speed = self.step_size
         x_cen = x_crd[cen_ev]
         y_cen = y_crd[cen_ev]
-        init_pos = np.array([x_cen[0, :], y_cen[0, :]]).transpose()
+        if self.initial_pos is None:
+            init_pos = np.array([x_cen[0, :], y_cen[0, :]]).transpose()
+        else:
+            init_pos = self.initial_pos
         x_ran = np.array([x_crd.min(), x_crd.max()])
         y_ran = np.array([y_crd.min(), y_crd.max()])
-        x_cen, y_cen = dynamic_centers(init_pos, self.n_MC, grid_speed, x_ran, y_ran)
+        x_cen, y_cen = dynamic_centers(init_pos, self.n_MC, grid_speed, self.move_type, x_ran, y_ran, self.move_direction)
         # x_cen, y_cen = dynamic_centers_with_rebound(init_pos, self.n_MC, grid_speed, x_ran, y_ran)
 
         # record the centers
@@ -2055,7 +2078,18 @@ def cr_fd(fd_scen, dat_path, kind):
          pi0_des, sha_fa, fast_fa, prop_env] = ls.ld_sc(
              os.path.join(dat_path), fd_scen)
         noise_std = ls.ld_noise_std(os.path.join(dat_path))
-        fd = RadioSpatialField(fd_scen, fd_dim, n_MC, 100, n_sam, noise_std)
+        try:
+            # load the transmitter control parameters:
+            move_type, step_size, initial_pos, move_direction = ls.ld_control_paras(os.path.join(dat_path))
+            control_paras = {
+                'move_type': move_type,
+                'step_size': step_size,
+                'initial_pos': initial_pos,
+                'move_direction': move_direction
+            }
+            fd = RadioSpatialField(fd_scen, fd_dim, n_MC, 100, n_sam, noise_std, control_paras)  
+        except:
+            fd = RadioSpatialField(fd_scen, fd_dim, n_MC, 100, n_sam, noise_std)
         fd.pla_tra(fd_scen, dat_path)
         ls.sv_fd(dat_path, fd)
     print("Field created and stored successfully!")
@@ -2126,7 +2160,7 @@ def rd_in_fds(fd_scen, sen_cfg, dat_path):
             ls.sv_fd(os.path.join(dat_path, 'fd_est'), est_fd)
     return fd, est_fd
 
-def dynamic_centers(init_pos, n_time_steps, grid_speed, x_ran, y_ran):
+def dynamic_centers(init_pos, n_time_steps, grid_speed, move_type, x_ran, y_ran, move_direction = []):
     """Create dynamic centers for transmitters.
 
     Inputs:
@@ -2140,6 +2174,14 @@ def dynamic_centers(init_pos, n_time_steps, grid_speed, x_ran, y_ran):
 
     grid_speed : float
     The speed of the transmitters.
+
+    move_type: str
+    The moving style of the transmitters.
+    'random_walk' or 'straight'
+
+    move_direction: list
+    records the moving direction of different moving transmitters.
+    e.g., [0, 2] # 0: up (y+=1), 1: down, 2: left, 3: right(x+=1)
 
     Returns
     -------
@@ -2159,7 +2201,10 @@ def dynamic_centers(init_pos, n_time_steps, grid_speed, x_ran, y_ran):
         # dynamic_pos[t, :, :] = dynamic_pos[t - 1, :, :] + grid_speed
         # randomly select a direction
         for k in range(n_dynamic_points):
-            direction = np.random.randint(0, 4)
+            if move_type == 'random_walk':
+                direction = np.random.randint(0, 4)
+            elif move_type == 'straight':
+                direction = move_direction[k]
             # 0: up (y+=1), 1: down, 2: left, 3: right(x+=1)
             if direction == 0:
                 dynamic_pos[t, k, :] = dynamic_pos[t - 1, k, :] + np.array([0, grid_speed])

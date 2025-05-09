@@ -628,7 +628,7 @@ def get_config(dataset, vary_snr = True):
         config = {
             'data_path': data_path,
             'res_path': res_path,
-            'repeat_time': 1,
+            'repeat_time': 60,
             'alp_levels': np.concatenate((np.array([0.02, 0.05, 0.07]), np.linspace(0.10, 1, 19))),
             'sav_res': True,
             'sav_plots': True,  # Save the plots as pdf files

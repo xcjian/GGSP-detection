@@ -616,7 +616,8 @@ def get_config(dataset, vary_snr = True):
         data_path = []
         res_path = []
 
-        T_idx_list = list(range(0, 15))
+        #T_idx_list = list(range(0, 15))
+        T_idx_list = list(range(0, 14, 2))
 
         for T_idx in T_idx_list:
             data_path_ = os.path.join(os.getcwd(), '../data/scC_TSPIN/straight_move_data/T_{}'.format(T_idx), 'data_for_py')
@@ -628,7 +629,7 @@ def get_config(dataset, vary_snr = True):
         config = {
             'data_path': data_path,
             'res_path': res_path,
-            'repeat_time': 60,
+            'repeat_time': 30,
             'alp_levels': np.concatenate((np.array([0.02, 0.05, 0.07]), np.linspace(0.10, 1, 19))),
             'sav_res': True,
             'sav_plots': True,  # Save the plots as pdf files

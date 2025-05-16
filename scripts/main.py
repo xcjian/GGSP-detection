@@ -31,7 +31,7 @@ parser.add_argument('--vary_snr', action='store_true', default=True,
                     help='vary the SNR levels')
 parser.add_argument('--no_vary_snr', action='store_false', dest='vary_snr',
                     help='Do not vary the SNR levels')
-parser.add_argument('--repeat_time', type=int, default=20,
+parser.add_argument('--repeat_time', type=int, default=100,
                     help='The number of times to repeat the experiments.')
 parser.add_argument('--alp_levels', type=float, nargs='+', default=[0.02, 0.05, 0.07] + list(np.linspace(0.10, 1, 19)),
                     help='The nominal FDR levels.')

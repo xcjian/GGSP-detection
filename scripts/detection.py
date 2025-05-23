@@ -301,7 +301,7 @@ def lfdr_oracle(data, sav_path, sav_res):
         
         lfdr = res['lfdr']
         pi0 = res['pi0']
-        f_p = res['fp']
+        f_p = res['f_p']
         time_cost = res['time']
 
         print("MHT-GGSP-oracle loaded!")

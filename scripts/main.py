@@ -31,7 +31,7 @@ parser.add_argument('--vary_snr', action='store_true', default=True,
                     help='vary the SNR levels')
 parser.add_argument('--no_vary_snr', action='store_false', dest='vary_snr',
                     help='Do not vary the SNR levels')
-parser.add_argument('--repeat_time', type=int, default=20,
+parser.add_argument('--repeat_time', type=int, default=100,
                     help='The number of times to repeat the experiments.')
 parser.add_argument('--alp_levels', type=float, nargs='+', default=[0.02, 0.05, 0.07] + list(np.linspace(0.10, 1, 19)),
                     help='The nominal FDR levels.')
@@ -113,14 +113,21 @@ colors = [colors[i] for i in method_indices]
 markers = [markers[i] for i in method_indices]
 
 # -------------------
+noise_levels = np.zeros(len(data_path))
+n_noise_levels = len(data_path)
+
 FDR_vary_summary = {}
 Power_vary_summary = {}
-noise_levels = np.zeros(len(data_path))
 for method in method_names:
     FDR_vary_summary[method] = []
     Power_vary_summary[method] = []
 
-n_noise_levels = len(data_path)
+FDR_vary_all = {}
+Power_vary_all = {} # store all the FDR and power results.
+for method in method_names:
+    FDR_vary_all[method] = np.zeros((n_noise_levels, len(alp_levels), repeat_time))
+    Power_vary_all[method] = np.zeros((n_noise_levels, len(alp_levels), repeat_time))
+
 for noise_idx in range(n_noise_levels):
     start_time = time.time()
 
@@ -350,6 +357,38 @@ for noise_idx in range(n_noise_levels):
             Power_summary['AdaPT'].append(pow_adapt)
 
     # -------------------
+    # Test the significance, and present the results
+    # -------------------
+    for key in method_names:        
+        FDR_vary_all[key][noise_idx] = np.array(FDR_summary[key]).T
+        Power_vary_all[key][noise_idx] = np.array(Power_summary[key]).T
+    
+    # Initialize table with alp_levels as first column
+    p_val_table = pd.DataFrame({'alpha_level': alp_levels})
+    for key in method_names:
+        if key != 'MHT-GGSP':
+            # Add a column for each method
+            p_val_table[key] = np.nan  # Initialize column with NaN
+
+            pow_proposed_ = Power_vary_all['MHT-GGSP'][noise_idx]
+            pow_baseline_ = Power_vary_all[key][noise_idx]
+
+            for alp_idx_, alp_level_ in enumerate(alp_levels):
+                pow_proposed__ = pow_proposed_[alp_idx_, :]
+                pow_baseline__ = pow_baseline_[alp_idx_, :]
+
+                Wilcoxon_test_ = stats.wilcoxon(pow_proposed__, pow_baseline__,alternative='greater',zero_method = 'zsplit')
+                p_val_Wilcoxon_ = Wilcoxon_test_.pvalue
+
+                # Store p-value in the table
+                p_val_table.loc[alp_idx_, key] = p_val_Wilcoxon_
+
+    # Save the table as CSV
+    output_path = os.path.join(curr_res_path, 'Wilcoxon_test.csv')
+    p_val_table.to_csv(output_path, index=False)
+    print(f"Wilcoxon test results saved to: {output_path}")
+    
+    # -------------------
     # Plot the results
     # -------------------
 
@@ -441,6 +480,34 @@ for noise_idx in range(n_noise_levels):
         plt.show()
 
     print('noise level:', noise_idx, 'iteration time:', time.time() - start_time)
+
+# test the power difference under different noise levels
+
+# Initialize table with alp_levels as first column
+p_val_table = pd.DataFrame({'noise_level': noise_levels})
+for key in method_names:
+    if key != 'MHT-GGSP':
+        # Add a column for each method
+        p_val_table[key] = np.nan  # Initialize column with NaN
+
+        pow_proposed_ = Power_vary_all['MHT-GGSP'][:, snr_show_alpha_idx, :]
+        pow_baseline_ = Power_vary_all[key][:, snr_show_alpha_idx, :]
+
+        for noise_idx_, noise_level_ in enumerate(noise_levels):
+            pow_proposed__ = pow_proposed_[noise_idx_, :]
+            pow_baseline__ = pow_baseline_[noise_idx_, :]
+
+            Wilcoxon_test_ = stats.wilcoxon(pow_proposed__, pow_baseline__,alternative='greater',zero_method = 'zsplit')
+            p_val_Wilcoxon_ = Wilcoxon_test_.pvalue
+
+            # Store p-value in the table
+            p_val_table.loc[noise_idx_, key] = p_val_Wilcoxon_
+
+# Save the table as CSV
+output_path = os.path.join(os.path.dirname(res_path[0]), 'Wilcoxon_test.csv')
+p_val_table.to_csv(output_path, index=False)
+print(f"Wilcoxon test results saved to: {output_path}")
+
 
 # Plot the FDR and power for different noise levels
 plt.figure()

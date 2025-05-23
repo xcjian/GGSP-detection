@@ -658,7 +658,7 @@ def get_config(dataset, vary_snr = True):
     config['markers'] = markers
 
     if dataset == 'communication':
-        omit_method = []
+        omit_method = ['Prop-matching']
     elif dataset == 'communication_illus':
         omit_method = []
     elif dataset == 'straight_move' or dataset == 'straight_move_illus':

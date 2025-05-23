@@ -77,7 +77,7 @@ graph_bw_ran = config['graph_bw_ran']
 time_bw_ran = config['time_bw_ran']
 
 # Number of workers for the parallelization
-num_wrk = np.min((50, os.cpu_count() - 1))  # Change first value if you want to
+num_wrk = np.min((2, os.cpu_count() - 1))  # Change first value if you want to
 
 #Set plotting parameters
 method_names = ['MHT-GGSP', 'MHT-GGSP-oracle']

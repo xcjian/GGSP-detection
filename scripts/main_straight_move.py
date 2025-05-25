@@ -17,6 +17,7 @@ from para_estimation import compute_pi0
 import parameters as par
 import networkx as nx
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FormatStrFormatter
 import load_and_save as ls
 
 # -------------------
@@ -84,6 +85,10 @@ method_names = ['MHT-GGSP', 'MHT-GGSP-oracle']
 line_styles = ['--', '--']
 colors = ['r', 'tab:brown']
 markers = ['D', 'o']
+
+xylabel_fontsize = 16
+xytick_fontsize = 14
+legend_fontsize = 14
 
 # -------------------
 #FDR_vary_summary = {}
@@ -261,33 +266,47 @@ if sav_plots:
 plt.show()
 
 ## plot FDR
-disp_alp_idx = 1
-plt.figure()
-for idx, method in enumerate(method_names):
-    FDR_mean = np.mean(FDR_summary[method][:, :, disp_alp_idx], axis = 0)
-    plt.plot(T_levels * n_vertex, FDR_mean, label = method, linestyle=line_styles[idx], color=colors[idx], marker=markers[idx])
-    
-plt.xlabel(r'$I$')
-plt.ylabel(r'$empirical FDR$')
-plt.legend()
-if sav_plots:
-    res_fig_folder = os.path.dirname(sav_property_path)
-    plt.savefig(res_fig_folder + '/FDR.pdf')
-plt.show()
+disp_alp_idx = [0, 1, 3]
+for disp_alp_idx_ in disp_alp_idx:
+    plt.figure()
+    for idx, method in enumerate(method_names):
+        FDR_mean = np.mean(FDR_summary[method][:, :, disp_alp_idx_], axis = 0)
+        plt.plot(T_levels * n_vertex / 1000, FDR_mean, label = method, linestyle=line_styles[idx], color=colors[idx], marker=markers[idx])
+    plt.plot(T_levels * n_vertex / 1000, np.repeat(alp_levels[disp_alp_idx_], len(T_levels)), linestyle='-', color='k', label=r'$\alpha$') # plot the nominal FDR level
+    plt.xlabel(r'$I(\times 10^3)$', fontsize = xylabel_fontsize)
+    plt.ylabel('empirical FDR', fontsize = xylabel_fontsize)
+
+    # Set y-axis to show exactly 2 decimal places
+    plt.gca().yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+    plt.xticks(fontsize=xytick_fontsize)
+    plt.yticks(fontsize=xytick_fontsize)
+    if disp_alp_idx_ == 0:
+        plt.legend()
+    if sav_plots:
+        res_fig_folder = os.path.dirname(sav_property_path)
+        res_fig_file_name_ = '/FDR_asymp_' + str(disp_alp_idx_) + '.pdf'
+        plt.savefig(res_fig_folder + res_fig_file_name_)
+    plt.show()
 
 ## plot power
-disp_alp_idx = 1
-plt.figure()
-for idx, method in enumerate(method_names):
-    pow_mean = np.mean(Power_summary[method][:, :, disp_alp_idx], axis = 0)
-    plt.plot(T_levels * n_vertex, pow_mean, label = method, linestyle=line_styles[idx], color=colors[idx], marker=markers[idx])
-    
-plt.xlabel(r'$I$')
-plt.ylabel(r'$empirical power$')
-plt.legend()
-if sav_plots:
-    res_fig_folder = os.path.dirname(sav_property_path)
-    plt.savefig(res_fig_folder + '/pow.pdf')
-plt.show()
+for disp_alp_idx_ in disp_alp_idx:
+    plt.figure()
+    for idx, method in enumerate(method_names):
+        pow_mean = np.mean(Power_summary[method][:, :, disp_alp_idx_], axis = 0)
+        plt.plot(T_levels * n_vertex / 1000, pow_mean, label = method, linestyle=line_styles[idx], color=colors[idx], marker=markers[idx])
+        
+    plt.xlabel(r'$I(\times 10^3)$', fontsize = xylabel_fontsize)
+    plt.ylabel('empirical power', fontsize = xylabel_fontsize)
+    # Set y-axis to show exactly 2 decimal places
+    plt.gca().yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+    plt.xticks(fontsize=xytick_fontsize)
+    plt.yticks(fontsize=xytick_fontsize)
+    if disp_alp_idx_ == 0:
+        plt.legend()
+    if sav_plots:
+        res_fig_folder = os.path.dirname(sav_property_path)
+        res_fig_file_name_ = '/pow_asymp_' + str(disp_alp_idx_) + '.pdf'
+        plt.savefig(res_fig_folder + res_fig_file_name_)
+    plt.show()
 
 print('ok')

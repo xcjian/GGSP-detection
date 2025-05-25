@@ -112,6 +112,10 @@ line_styles = [line_styles[i] for i in method_indices]
 colors = [colors[i] for i in method_indices]
 markers = [markers[i] for i in method_indices]
 
+xylabel_fontsize = 14
+xytick_fontsize = 12
+legend_fontsize = 12
+
 # -------------------
 noise_levels = np.zeros(len(data_path))
 n_noise_levels = len(data_path)
@@ -409,14 +413,16 @@ for noise_idx in range(n_noise_levels):
     plt.figure()
     for key_idx, key in enumerate(FDR_summary_avg.keys()):
         plt.plot(alp_levels[:idx], FDR_summary_avg[key][:idx], label=key, linestyle=line_styles[key_idx], color=colors[key_idx], marker=markers[key_idx])
-        # Name x-axis and y-axis
-        plt.xlabel('nominal FDR level')
-        plt.ylabel('empirical FDR')
 
     # Add a x=y line
     x = np.linspace(alp_levels[0], alp_levels[idx - 1], 100)
     plt.plot(x, x, linestyle='-', color='k', label=r'$\alpha$')
-    plt.legend()
+    # plt.legend()
+    # Name x-axis and y-axis
+    plt.xlabel('nominal FDR level', fontsize = xylabel_fontsize)
+    plt.ylabel('empirical FDR', fontsize = xylabel_fontsize)
+    plt.xticks(fontsize = xytick_fontsize)
+    plt.yticks(fontsize = xytick_fontsize)
     if sav_plots:
         plt.savefig(os.path.join(curr_res_path, 'empirical_FDR.pdf'))
     plt.show()
@@ -426,9 +432,11 @@ for noise_idx in range(n_noise_levels):
     for key_idx, key in enumerate(Power_summary_avg.keys()):
         plt.plot(alp_levels[:idx], Power_summary_avg[key][:idx], label=key, linestyle=line_styles[key_idx], color=colors[key_idx], marker=markers[key_idx])
         # Name x-axis and y-axis
-    plt.xlabel('nominal FDR level')
-    plt.ylabel('empirical power')
-    plt.legend()
+    plt.xlabel('nominal FDR level', fontsize = xylabel_fontsize)
+    plt.ylabel('empirical power', fontsize = xylabel_fontsize)
+    plt.xticks(fontsize = xytick_fontsize)
+    plt.yticks(fontsize = xytick_fontsize)
+    # plt.legend()
     if sav_plots:
         plt.savefig(os.path.join(curr_res_path, 'empirical_power.pdf'))
     plt.show()
@@ -514,10 +522,13 @@ plt.figure()
 for key_idx, key in enumerate(FDR_vary_summary.keys()):
     plt.plot(noise_levels, FDR_vary_summary[key], label=key, linestyle=line_styles[key_idx], color=colors[key_idx], marker=markers[key_idx])
     # Name x-axis and y-axis
+plt.plot(noise_levels, np.repeat(alp_levels[snr_show_alpha_idx], n_noise_levels), linestyle='-', color='k', label=r'$\alpha$') # plot the nominal FDR level
 plt.gca().invert_xaxis()
-plt.xlabel('noise level')
-plt.ylabel('empirical FDR')
-plt.legend()
+plt.xlabel('noise level', fontsize = xylabel_fontsize)
+plt.ylabel('empirical FDR', fontsize = xylabel_fontsize)
+plt.xticks(fontsize=xytick_fontsize)
+plt.yticks(fontsize=xytick_fontsize)
+# plt.legend()
 if sav_plots:
     plt.savefig(os.path.join(os.path.dirname(res_path[0]), 'FDR_vary.pdf'))
 plt.show()
@@ -527,11 +538,44 @@ for key_idx, key in enumerate(Power_vary_summary.keys()):
     plt.plot(noise_levels, Power_vary_summary[key], label=key, linestyle=line_styles[key_idx], color=colors[key_idx], marker=markers[key_idx])
     # Name x-axis and y-axis
 plt.gca().invert_xaxis()
-plt.xlabel('noise level')
-plt.ylabel('empirical power')
-plt.legend()
+plt.xlabel('noise level', fontsize = xylabel_fontsize)
+plt.ylabel('empirical power', fontsize = xylabel_fontsize)
+plt.xticks(fontsize=xytick_fontsize)
+plt.yticks(fontsize=xytick_fontsize)
+# plt.legend()
 if sav_plots:
     plt.savefig(os.path.join(os.path.dirname(res_path[0]), 'Power_vary.pdf'))
 plt.show()
+
+# plot standalone legend
+# First create a dummy figure to extract legend handles/labels
+plt.figure(figsize=(8, 1))  # Width x Height (adjust as needed)
+
+# Plot invisible lines just to generate legend entries
+for key_idx, key in enumerate(FDR_vary_summary.keys()):
+    plt.plot([], [],  # Empty data
+             label=key, 
+             linestyle=line_styles[key_idx], 
+             color=colors[key_idx], 
+             marker=markers[key_idx])
+
+# Add the alpha level line
+plt.plot([], [], linestyle='-', color='k', label=r'$\alpha$')
+
+# Create legend without axes
+legend = plt.legend(ncol=3,  # Adjust number of columns
+                   frameon=False,
+                   loc='center',
+                   fontsize = legend_fontsize)
+
+plt.axis('off')  # Hide axes
+plt.tight_layout()
+
+# Save just the legend
+legend_path = os.path.join(os.path.dirname(res_path[0]), 'legends.pdf')
+plt.savefig(legend_path, bbox_inches='tight', transparent=True)
+plt.close()
+
+print(f"Standalone legend saved to: {legend_path}")
 
 print('ok')

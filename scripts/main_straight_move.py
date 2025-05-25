@@ -29,7 +29,7 @@ parser = argparse.ArgumentParser()
 # Add the dataset argument with choices
 parser.add_argument('--dataset', type=str, default='straight_move', choices=['straight_move'],
                     help='The dataset to be used for the experiments.')
-parser.add_argument('--repeat_time', type=int, default=2,
+parser.add_argument('--repeat_time', type=int, default=30,
                     help='The number of times to repeat the experiments.')
 parser.add_argument('--alp_levels', type=float, nargs='+', default=[0.02, 0.05, 0.07] + list(np.linspace(0.10, 1, 19)),
                     help='The nominal FDR levels.')
@@ -82,8 +82,8 @@ res_path = config['res_path']
 #Set plotting parameters
 method_names = ['MHT-GGSP', 'MHT-GGSP-oracle']
 line_styles = ['--', '--']
-colors = ['r', 'm']
-markers = ['D', 'tab:brown']
+colors = ['r', 'tab:brown']
+markers = ['D', 'o']
 
 # -------------------
 #FDR_vary_summary = {}

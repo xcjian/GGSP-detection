@@ -82,8 +82,8 @@ num_wrk = np.min((2, os.cpu_count() - 1))  # Change first value if you want to
 #Set plotting parameters
 method_names = ['MHT-GGSP', 'MHT-GGSP-oracle']
 line_styles = ['--', '--']
-colors = ['r', 'm']
-markers = ['D', 'tab:brown']
+colors = ['r', 'tab:brown']
+markers = ['D', 'o']
 
 # -------------------
 T_levels = np.zeros(len(data_path))
@@ -257,8 +257,8 @@ with open(sav_property_path, 'wb') as f:
 # plot
 
 ## plot K1 and K2
-K1_mean = np.mean(K1, axis = 0)
-K2_mean = np.mean(K2, axis = 0)
+K1_mean = np.mean(K1, axis = 1)
+K2_mean = np.mean(K2, axis = 1)
 ### K1:
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize = (10, 10))
 ax1.plot(T_levels * n_vertex, K1_mean, label = 'K1')

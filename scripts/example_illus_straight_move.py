@@ -48,7 +48,7 @@ hypotheses = data_dict['hypotheses']
 center_coords = data_dict['center_coords']
 shadow_faded_signal = data_dict['shadow_faded_signal']
 
-inspect_instance = [0, 6, 12, 18]
+inspect_instance = [0, 18]
 n_vertices = node_coords.shape[0]
 n_instances = center_coords.shape[0]
 gamma_dim = shadow_faded_signal.shape[2]
@@ -70,7 +70,7 @@ for k in range(gamma_dim):
 
 gamma_norm_graph = np.linalg.norm(gamma_graph, axis=2)
 # ------------------------------------------------------------
-# Plot gamma(v,t) on the graph for one instance.
+# Plot gamma(v,t) on the graph for instances.
 # ------------------------------------------------------------
 
 # Create the graph from the adjacency matrix
@@ -123,15 +123,15 @@ def plot_gam_combined(gamma_grid, gamma_graph, transmitter_coords, plot_val_rang
                     transform=ax.transAxes,
                     ha='center', 
                     va='top',
-                    fontsize=20)
+                    fontsize=25)
 
     # Tighten the layout first
     plt.tight_layout(pad=1.0)
 
-    # Add a shared color bar on the left
-    cax = fig.add_axes([0.08, 0.15, 0.02, 0.7])  # [left, bottom, width, height]
-    cbar = plt.colorbar(im, cax=cax, orientation="vertical")
-    cbar.ax.tick_params(labelsize=20)
+    # Add a shared color bar on the top
+    cax = fig.add_axes([0.15, 0.92, 0.7, 0.03])  # [left, bottom, width, height]
+    cbar = plt.colorbar(im, cax=cax, orientation="horizontal")
+    cbar.ax.tick_params(labelsize=25)
 
     # Save the combined figure if required
     if save_fig:
@@ -195,11 +195,11 @@ for i, (lower, upper) in enumerate(zip(gam_pval_bins[:-1], gam_pval_bins[1:])):
            label=f'{lower}≤γ<{upper}')
 
 ax.set_xlim(0, 1)
-ax.set_xlabel('Alternative $p$-value', fontsize=14)
-ax.set_ylabel('Density', fontsize=14)
-ax.tick_params(axis='both', labelsize=12)
-ax.legend(fontsize=12, title='γ ranges', title_fontsize=12)
-ax.set_title('Alternative $p$-value Distributions by γ Ranges', fontsize=16)
+ax.set_xlabel('Alternative $p$-value', fontsize=20)
+ax.set_ylabel('Density', fontsize=20)
+ax.tick_params(axis='both', labelsize=20)
+ax.legend(fontsize=20, title='γ ranges', title_fontsize=20)
+ax.set_title('Alternative $p$-value Distributions by γ Ranges', fontsize=20)
 
 if save_fig:
     fig_path = os.path.join(res_path, 'alt_pval_dist_overlap.pdf')
@@ -264,12 +264,12 @@ for idx, t in enumerate(inspect_instance):
     
     # Add time label
     ax.text(0.5, 0.02, f'$t = {t}$', transform=ax.transAxes,
-           ha='center', va='top', fontsize=20)
+           ha='center', va='top', fontsize=25)
 
-# Add single colorbar
-cax = fig.add_axes([0.08, 0.15, 0.01, 0.7]) # [left, bottom, width, height]
-cbar = plt.colorbar(im, cax=cax, orientation="vertical")
-cbar.ax.tick_params(labelsize=20)
+# Add single colorbar on the top
+cax = fig.add_axes([0.15, 0.92, 0.7, 0.03]) # [left, bottom, width, height]
+cbar = plt.colorbar(im, cax=cax, orientation="horizontal")
+cbar.ax.tick_params(labelsize=25)
 
 # Add legend for transmitters (only once)
 if gamma_dim > 1:
@@ -322,16 +322,17 @@ im = plt.imshow(pi0_matrix, origin='lower',
 
 # Add colorbar
 cbar = plt.colorbar(im)
-cbar.set_label('π₀ value', fontsize=12)
+cbar.set_label('π₀ value', fontsize=25)
+cbar.ax.tick_params(labelsize=25)
 
 # Add title only (no axis labels)
-plt.title(r'$\pi_0$ as function of γ values', fontsize=14)
+plt.title(r'$\pi_0$ as function of γ values', fontsize=25)
 
 # Remove axis labels
 plt.xlabel('')
 plt.ylabel('')
-plt.xticks([gam_dom_min, gam_dom_max], [str(gam_dom_min), str(gam_dom_max)])# 0 at start, 0.5 at end
-plt.yticks([gam_dom_min, gam_dom_max], [str(gam_dom_min), str(gam_dom_max)])# 0 at start, 0.5 at end
+plt.xticks([gam_dom_min, gam_dom_max], [str(gam_dom_min), str(gam_dom_max)], fontsize=25)# 0 at start, 0.5 at end
+plt.yticks([gam_dom_min, gam_dom_max], [str(gam_dom_min), str(gam_dom_max)], fontsize=25)# 0 at start, 0.5 at end
 
 if save_fig:
     fig_path = os.path.join(res_path, 'pi0_vs_gamma.pdf')

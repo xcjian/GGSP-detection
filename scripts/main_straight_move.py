@@ -266,47 +266,123 @@ if sav_plots:
 plt.show()
 
 ## plot FDR
+# 1. First create and save the FDR plot without legend
+plt.figure(figsize=(7, 4))
 disp_alp_idx = [0, 1, 3]
-for disp_alp_idx_ in disp_alp_idx:
-    plt.figure()
-    for idx, method in enumerate(method_names):
-        FDR_mean = np.mean(FDR_summary[method][:, :, disp_alp_idx_], axis = 0)
-        plt.plot(T_levels * n_vertex / 1000, FDR_mean, label = method, linestyle=line_styles[idx], color=colors[idx], marker=markers[idx])
-    plt.plot(T_levels * n_vertex / 1000, np.repeat(alp_levels[disp_alp_idx_], len(T_levels)), linestyle='-', color='k', label=r'$\alpha$') # plot the nominal FDR level
-    plt.xlabel(r'$I(\times 10^3)$', fontsize = xylabel_fontsize)
-    plt.ylabel('empirical FDR', fontsize = xylabel_fontsize)
+alpha_colors = ['#1f77b4', '#ff7f0e', '#2ca02c']  # Blue, Orange, Green
 
-    # Set y-axis to show exactly 2 decimal places
-    plt.gca().yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
-    plt.xticks(fontsize=xytick_fontsize)
-    plt.yticks(fontsize=xytick_fontsize)
-    if disp_alp_idx_ == 0:
-        plt.legend()
-    if sav_plots:
-        res_fig_folder = os.path.dirname(sav_property_path)
-        res_fig_file_name_ = '/FDR_asymp_' + str(disp_alp_idx_) + '.pdf'
-        plt.savefig(res_fig_folder + res_fig_file_name_)
-    plt.show()
+# Plot curves (same as before)
+for method_idx, method in enumerate(method_names):
+    for alpha_idx, disp_alp_idx_ in enumerate(disp_alp_idx):
+        FDR_mean = np.mean(FDR_summary[method][:, :, disp_alp_idx_], axis=0)
+        plt.plot(T_levels * n_vertex / 1000, 
+                FDR_mean,
+                linestyle=line_styles[method_idx],
+                color=alpha_colors[alpha_idx],
+                marker=markers[method_idx])
 
-## plot power
-for disp_alp_idx_ in disp_alp_idx:
-    plt.figure()
-    for idx, method in enumerate(method_names):
-        pow_mean = np.mean(Power_summary[method][:, :, disp_alp_idx_], axis = 0)
-        plt.plot(T_levels * n_vertex / 1000, pow_mean, label = method, linestyle=line_styles[idx], color=colors[idx], marker=markers[idx])
-        
-    plt.xlabel(r'$I(\times 10^3)$', fontsize = xylabel_fontsize)
-    plt.ylabel('empirical power', fontsize = xylabel_fontsize)
-    # Set y-axis to show exactly 2 decimal places
-    plt.gca().yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
-    plt.xticks(fontsize=xytick_fontsize)
-    plt.yticks(fontsize=xytick_fontsize)
-    if disp_alp_idx_ == 0:
-        plt.legend()
-    if sav_plots:
-        res_fig_folder = os.path.dirname(sav_property_path)
-        res_fig_file_name_ = '/pow_asymp_' + str(disp_alp_idx_) + '.pdf'
-        plt.savefig(res_fig_folder + res_fig_file_name_)
-    plt.show()
+# Plot nominal alpha levels
+for alpha_idx, disp_alp_idx_ in enumerate(disp_alp_idx):
+    plt.plot(T_levels * n_vertex / 1000,
+            np.repeat(alp_levels[disp_alp_idx_], len(T_levels)),
+            linestyle='--',
+            color=alpha_colors[alpha_idx],
+            alpha=0.5)
+
+# Formatting
+plt.xlabel(r'$I(\times 10^3)$', fontsize=xylabel_fontsize)
+plt.ylabel('empirical FDR', fontsize=xylabel_fontsize)
+plt.gca().yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+plt.xticks(fontsize=xytick_fontsize)
+plt.yticks(fontsize=xytick_fontsize)
+plt.tight_layout()
+
+if sav_plots:
+    res_fig_folder = os.path.dirname(sav_property_path)
+    plt.savefig(os.path.join(res_fig_folder, 'FDR_asymp.pdf'),
+               bbox_inches='tight')
+plt.close()
+
+# 2. Create a separate legend figure with larger font
+legend_fontsize = xytick_fontsize + 8  # Increase font size
+legend_fig = plt.figure(figsize=(10, 2.5))  # Increased height for larger text
+
+# Create proxy artists (same as before)
+handles = []
+labels = []
+
+# First row: MHT-GGSP for all alpha levels
+for alpha_idx, disp_alp_idx_ in enumerate(disp_alp_idx):
+    handles.append(plt.Line2D([], [],
+                            color=alpha_colors[alpha_idx],
+                            linestyle=line_styles[0],
+                            marker=markers[0],
+                            markersize=13))  # Slightly larger markers
+    labels.append(f'MHT-GGSP ($\\alpha={alp_levels[disp_alp_idx_]:.2f}$)')
+
+# Second row: MHT-GGSP-oracle for all alpha levels
+for alpha_idx, disp_alp_idx_ in enumerate(disp_alp_idx):
+    handles.append(plt.Line2D([], [],
+                            color=alpha_colors[alpha_idx],
+                            linestyle=line_styles[1],
+                            marker=markers[1],
+                            markersize=13))
+    labels.append(f'MHT-GGSP-oracle ($\\alpha={alp_levels[disp_alp_idx_]:.2f}$)')
+
+# Third row: Alpha level reference lines
+for alpha_idx, disp_alp_idx_ in enumerate(disp_alp_idx):
+    handles.append(plt.Line2D([], [],
+                            color=alpha_colors[alpha_idx],
+                            linestyle='--',
+                            alpha=0.5,
+                            linewidth=2))  # Slightly thicker lines
+    labels.append(f'Nominal level ($\\alpha={alp_levels[disp_alp_idx_]:.2f}$)')
+
+# Create legend with larger font
+legend = legend_fig.legend(handles, labels,
+                         loc='center',
+                         ncol=3,
+                         fontsize=legend_fontsize,  # Use increased font size
+                         frameon=False,
+                         handlelength=2.5,  # Longer line samples
+                         handletextpad=0.5)  # Space between line and text
+
+plt.axis('off')
+plt.tight_layout()
+
+if sav_plots:
+    plt.savefig(os.path.join(res_fig_folder, 'FDR_asymp_legend.pdf'),
+               bbox_inches='tight',
+               dpi=300)  # Higher resolution for better text
+plt.close()
+
+## plot power - consolidated version
+plt.figure(figsize=(7, 4))
+disp_alp_idx = [0, 1, 3]
+alpha_colors = ['#1f77b4', '#ff7f0e', '#2ca02c']  # Consistent with FDR plot
+
+# Plot each method's curves for all alpha levels
+for method_idx, method in enumerate(method_names):
+    for alpha_idx, disp_alp_idx_ in enumerate(disp_alp_idx):
+        pow_mean = np.mean(Power_summary[method][:, :, disp_alp_idx_], axis=0)
+        plt.plot(T_levels * n_vertex / 1000, 
+                pow_mean,
+                linestyle=line_styles[method_idx],
+                color=alpha_colors[alpha_idx],
+                marker=markers[method_idx])
+
+# Formatting (consistent with FDR plot)
+plt.xlabel(r'$I(\times 10^3)$', fontsize=xylabel_fontsize)
+plt.ylabel('empirical power', fontsize=xylabel_fontsize)
+plt.gca().yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+plt.xticks(fontsize=xytick_fontsize)
+plt.yticks(fontsize=xytick_fontsize)
+plt.tight_layout()
+
+if sav_plots:
+    res_fig_folder = os.path.dirname(sav_property_path)
+    plt.savefig(os.path.join(res_fig_folder, 'power_asymp.pdf'),
+               bbox_inches='tight')
+plt.close()
 
 print('ok')
